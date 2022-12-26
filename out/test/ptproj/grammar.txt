@@ -1,0 +1,29 @@
+Program -> Block
+Block -> "{" StatementList "}"
+StatementList -> Statement StatementList | ε
+Statement -> PrintStatement | Assignment | IfStatement | WhileStatement | ForStatement | FunctionDefinition | ReturnStatement
+
+PrintStatement -> "print" Expression
+Assignment -> Identifier "=" Expression
+IfStatement -> "if" "(" RelationalExpression ")" Block "else" Block| "if" "(" RelationalExpression ")" Statement
+WhileStatement -> "while" "(" RelationalExpression ")" Block
+ForStatement -> "for" "(" Identifier "in" Range ")" Block
+Range -> Expression ":" Expression
+
+FunctionDefinition -> "def" Identifier "(" FormalParameters ")" StatementList
+FormalParameters -> Identifier FormalParametersTail | ε
+FormalParametersTail -> "," Identifier FormalParametersTail | ε
+Return Statement -> "return" Expression
+FunctionCall -> Identifier "(" ActualParameters ")"
+ActualParameters -> Expression ActualParametersTail | ε
+ActualParametersTail -> "," Expression ActualParametersTail | ε
+
+RelOp -> < | <= | == | != | > | >=
+RelationalExpression -> Expression RelOp Expression
+
+Expression -> Term ExpressionTail
+ExpressionTail -> "+" Term ExpressionTail | "-" Term ExpressionTail | ε
+
+Term -> Factor TermTail
+TermTail -> "*" Factor TermTail | "/" Factor TermTail | ε
+Factor -> Identifier | Constant | "(" Expression ")" | "-" Factor

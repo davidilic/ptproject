@@ -1,0 +1,300 @@
+// import section
+
+import java_cup.runtime.*;
+import java.io.*;
+
+parser code {:
+
+    public int errNo = 0;
+
+    public static void main(String[] args)
+    {
+        try {
+            FileReader file = new FileReader(args[0]);
+            Scanner scanner = new MPLexer(file);
+            MPParser parser = new MPParser(scanner);
+            parser.parse();
+            if (parser.errNo == 0) {
+                System.out.println("Parse successful");
+            } else {
+                System.out.println("Parse failed: " + parser.errNo + " errors");
+            }
+        } catch (Exception e) {
+            System.out.println("Parse failed");
+            e.printStackTrace();
+        }
+    }
+
+    public int getLine() {
+        return ((MPLexer) getScanner()).getLine();
+    }
+:}
+
+// Terminal symbols
+terminal PRINT, IDENTIFIER, IF, ELSE, WHILE, FOR;
+terminal DEF, RETURN, IN, ASSIGNMENT, LPAREN, RPAREN, COLON;
+terminal COMMA, PLUS, MINUS, MULTIPLY, DIVIDE, LESS, LESSEQUAL;
+terminal EQUAL, NOTEQUAL, GREATER, GREATEREQUAL, CHARCONST, INTCONST, LBRACE, RBRACE;
+
+// Non-terminal symbols
+nonterminal Program, Block, StatementList, Statement, PrintStatement, Assignment;
+nonterminal IfStatement, WhileStatement, ForStatement, FunctionDefinition, ReturnStatement;
+nonterminal Expression, ExpressionTail, Term, TermTail, Factor, Range, FormalParameters, FormalParametersTail;
+nonterminal ActualParameters, ActualParametersTail, FunctionCall, RelationalExpression, RelOp;
+
+// Precedence
+precedence left PLUS, MINUS;
+precedence left MULTIPLY, DIVIDE;
+precedence left LESS, LESSEQUAL, EQUAL, NOTEQUAL, GREATER, GREATEREQUAL;
+
+// Grammar
+
+Program ::= Block 
+{:
+    System.out.println("Reduction 1");
+:}
+| error:e 
+{:
+    System.out.println("Program main block missing on line: " + parser.getLine() + ": " + e);
+    parser.errNo++;
+:};
+
+Block ::= LBRACE StatementList RBRACE 
+{:
+    System.out.println("Reduction 2");
+:}
+| error:e StatementList RBRACE 
+{:
+    System.out.println("Block missing left brace on line: " + parser.getLine() + ": " + e);
+    parser.errNo++;
+:}
+
+| LBRACE StatementList error:e 
+{:
+    System.out.println("Block missing right brace on line: " + parser.getLine() + ": " + e);
+    parser.errNo++;
+:};
+
+StatementList ::= Statement StatementList 
+{:
+    System.out.println("Reduction 3");
+:}
+| 
+{:
+    System.out.println("Reduction 4");
+:};
+
+Statement ::= PrintStatement 
+{:
+    System.out.println("Reduction 5");
+:}
+| Assignment 
+{:
+    System.out.println("Reduction 6");
+:}
+| IfStatement 
+{:
+    System.out.println("Reduction 7");
+:}
+| WhileStatement 
+{:
+    System.out.println("Reduction 8");
+:}
+| ForStatement 
+{:
+    System.out.println("Reduction 9");
+:}
+| FunctionDefinition 
+{:
+    System.out.println("Reduction 10");
+:}
+| ReturnStatement 
+{:
+    System.out.println("Reduction 11");
+:};
+
+PrintStatement ::= PRINT LPAREN Expression RPAREN 
+{:
+    System.out.println("Reduction 12");
+:};
+
+Assignment ::= IDENTIFIER ASSIGNMENT Expression 
+{:
+    System.out.println("Reduction 13");
+:};
+
+IfStatement ::= IF LPAREN RelationalExpression RPAREN Block ELSE Block 
+{:
+    System.out.println("Reduction 14");
+:}
+| IF LPAREN RelationalExpression RPAREN Block 
+{:
+    System.out.println("Reduction 15");
+:}
+| IF LPAREN RelationalExpression RPAREN Statement 
+{:
+    System.out.println("Reduction 16");
+:};
+
+WhileStatement ::= WHILE LPAREN RelationalExpression RPAREN Block 
+{:
+    System.out.println("Reduction 17");
+:};
+
+ForStatement ::= FOR IDENTIFIER IN Range Block 
+{:
+    System.out.println("Reduction 18");
+:};
+
+FunctionDefinition ::= DEF IDENTIFIER LPAREN FormalParameters RPAREN Block 
+{:
+    System.out.println("Reduction 19");
+:};
+
+ReturnStatement ::= RETURN Expression 
+{:
+    System.out.println("Reduction 20");
+:};
+
+Expression ::= Term ExpressionTail 
+{:
+    System.out.println("Reduction 21");
+:};
+
+ExpressionTail ::= PLUS Term ExpressionTail 
+{:
+    System.out.println("Reduction 22");
+:}
+| MINUS Term ExpressionTail 
+{:
+    System.out.println("Reduction 23");
+:}
+| 
+{:
+    System.out.println("Reduction 24");
+:};
+
+Term ::= Factor TermTail 
+{:
+    System.out.println("Reduction 25");
+:};
+
+TermTail ::= MULTIPLY Factor TermTail 
+{:
+    System.out.println("Reduction 26");
+:}
+| DIVIDE Factor TermTail 
+{:
+    System.out.println("Reduction 27");
+:}
+| 
+{:
+    System.out.println("Reduction 28");
+:};
+
+Factor ::= IDENTIFIER 
+{:
+    System.out.println("Reduction 29");
+:}
+| INTCONST 
+{:
+    System.out.println("Reduction 30");
+:}
+| CHARCONST 
+{:
+    System.out.println("Reduction 31");
+:}
+| LPAREN Expression RPAREN 
+{:
+    System.out.println("Reduction 32");
+:}
+| FunctionCall 
+{:
+    System.out.println("Reduction 33");
+:};
+
+Range ::= Expression COLON Expression 
+{:
+    System.out.println("Reduction 34");
+:}
+| Expression error:e 
+{:
+    System.out.println("Range missing colon on line: " + parser.getLine() + ": " + e);
+    parser.errNo++;
+:};
+
+FormalParameters ::= IDENTIFIER FormalParametersTail 
+{:
+    System.out.println("Reduction 35");
+:}
+| 
+{:
+    System.out.println("Reduction 36");
+:};
+
+FormalParametersTail ::= COMMA IDENTIFIER FormalParametersTail 
+{:
+    System.out.println("Reduction 37");
+:}
+| 
+{:
+    System.out.println("Reduction 38");
+:};
+
+ActualParameters ::= Expression ActualParametersTail 
+{:
+    System.out.println("Reduction 39");
+:}
+| 
+{:
+    System.out.println("Reduction 40");
+:};
+
+ActualParametersTail ::= COMMA Expression ActualParametersTail 
+{:
+    System.out.println("Reduction 41");
+:}
+| 
+{:
+    System.out.println("Reduction 42");
+:};
+
+FunctionCall ::= IDENTIFIER LPAREN ActualParameters RPAREN 
+{:
+    System.out.println("Reduction 43");
+:};
+
+RelationalExpression ::= Expression RelOp Expression 
+{:
+    System.out.println("Reduction 44");
+:}
+| Expression error:e 
+{:
+    System.out.println("Relational expression missing operator on line: " + parser.getLine() + ": " + e);
+    parser.errNo++;
+:};
+
+RelOp ::= LESS 
+{:
+    System.out.println("Reduction 45");
+:}
+| LESSEQUAL 
+{:
+    System.out.println("Reduction 46");
+:}
+| EQUAL 
+{:
+    System.out.println("Reduction 47");
+:}
+| NOTEQUAL 
+{:
+    System.out.println("Reduction 48");
+:}
+| GREATER 
+{:
+    System.out.println("Reduction 49");
+:}
+| GREATEREQUAL 
+{:
+    System.out.println("Reduction 50");
+:};
